@@ -11,12 +11,12 @@ function check_command {
 
 function check_csv_file {
   # Checks if the variable is set
-  if [ -z $1 ]; then
+  if [ -z "$1" ]; then
     echo "Error: CSV file not supplied"
     exit 1
   fi
   # checks if the file exists
-  if [ ! -f $1 ]; then
+  if [ ! -f "$1" ]; then
     echo "Error: CSV file ${1} does not exist"
     exit 1
   fi
@@ -27,9 +27,9 @@ function structure {
   echo
   echo "--- File structure ---"
   # Display column names
-  csvstat --names $csvfile
+  csvstat --names "$csvfile"
   # Display row count
-  csvstat --count $csvfile
+  csvstat --count "$csvfile"
   echo
 }
 
@@ -38,20 +38,20 @@ function crime_frequency {
   echo
   echo "--- Crime frequency ---"
   # Select case and total columns, sort in reverse and display
-  csvcut -c "Case Incident Type",Total $csvfile | csvsort -c Total -r | csvlook
+  csvcut -c "Case Incident Type",Total "$csvfile" | csvsort -c Total -r | csvlook
   echo
 }
 
 function crime_frequency_by_city {
   local csvfile=$1
   echo "Enter one of the following cities:"
-  csvstat --names $csvfile | head -n -1 | tail -n +2
+  csvstat --names "$csvfile" | head -n -1 | tail -n +2
   echo
-  read city
+  read -r city
   echo
   echo "--- Crime frequency by city ---"
   # Select case and city columns, sort in reverse and display the first
-  csvcut -c "Case Incident Type",$city crime.csv | csvsort -c $city -r | head -n 2 | csvlook
+  csvcut -c "Case Incident Type","$city" crime.csv | csvsort -c "$city" -r | head -n 2 | csvlook
   echo
 }
 
@@ -83,23 +83,23 @@ function menu {
   do
     case $opt in
       "File Structure")
-        structure $1
-        menu $1
+        structure "$1"
+        menu "$1"
         ;;
       "Crime frequency")
-        crime_frequency $1
-        menu $1
+        crime_frequency "$1"
+        menu "$1"
         ;;
       "Crime frequency by city")
-        crime_frequency_by_city $1
-        menu $1
+        crime_frequency_by_city "$1"
+        menu "$1"
         ;;
       "City lowest crime rate")
-        least_crime_city $1
-        menu $1
+        least_crime_city "$1"
+        menu "$1"
         ;;
       "Quit")
-        break
+        exit 0
         ;;
       *) echo "invalid option $REPLY";;
     esac
@@ -113,7 +113,7 @@ check_command "csvsort"
 check_command "csvlook"
 
 # Display usage
-usage() { echo "$0 usage:" && grep " .)\ #" $0; exit 0; }
+usage() { echo "$0 usage:" && grep " .)\\ #" "$0"; exit 0; }
 # Display usage if no arguments are supplied
 [ $# -eq 0 ] && usage
 
@@ -121,8 +121,8 @@ while getopts ":hsd:" arg; do
   case $arg in
     d) # Input CSV file to analyse
       csvfile=$OPTARG
-      check_csv_file $csvfile
-      menu $csvfile
+      check_csv_file "$csvfile"
+      menu "$csvfile"
       ;;
     h | *) # Display help.
       usage
